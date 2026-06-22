@@ -1,0 +1,48 @@
+mlflow:
+  tracking_uri: "file:./mlruns"
+  experiment_name: "text-classification"
+
+data:
+  train_path: "data/train.csv"
+  val_path: "data/val.csv"
+  test_path: "data/test.csv"
+
+preprocessing:
+  max_features: 50000
+  ngram_range: [1, 2]
+  min_df: 2
+  max_df: 0.95
+  sublinear_tf: true
+
+models:
+  active_model: "naive_bayes"
+  
+  compare_models:
+    - "naive_bayes"
+    - "xgboost"
+    - "lstm"
+    - "embedding"
+
+  hyperparameters:
+    naive_bayes:
+      alpha: [0.1, 0.5, 1.0]
+    xgboost:
+      n_estimators: [50, 100]
+      max_depth: [3, 5]
+      learning_rate: [0.05, 0.1]
+    lstm:
+      n_epochs: [3, 5]
+      hidden_dim: [64, 128]
+      lr: [0.001, 0.005]
+    embedding:
+      C: [0.1, 1.0, 10.0]
+
+
+training:
+  cross_validation_folds: 3
+  test_size: 0.2
+  val_size: 0.1
+  random_state: 42
+  n_jobs: -1
+  tuning_scoring: "f1_weighted"
+  select_best: true

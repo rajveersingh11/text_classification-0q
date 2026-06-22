@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Ticket Intelligent Routing Center</title>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-base: #0b0f19;
+            --bg-surface: #131b2e;
+            --bg-card: #1d263b;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.15);
+            --accent: #a855f7;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --transition-speed: 0.3s;
+            --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.05) 0, transparent 50%);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(19, 27, 46, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo i {
+            -webkit-text-fill-color: var(--primary);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .status-badge.error {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 1024px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.25);
+            box-shadow: 0 12px 40px -12px rgba(99, 102, 241, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        /* Customer search and list */
+        .search-box {
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.75rem;
+            background-color: rgba(11, 15, 25, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .customer-list-container {
+            max-height: 250px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding-right: 0.25rem;
+        }
+
+        /* Scrollbar customizing */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .customer-item {
+            padding: 1rem;
+            background-color: var(--bg-card);
+            border: 1px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .customer-item:hover {
+            background-color: rgba(99, 102, 241, 0.08);
+            border-color: rgba(99, 102, 241, 0.2);
+            transform: translateX(3px);
+        }
+
+        .customer-item.selected {
+            background-color: rgba(99, 102, 241, 0.15);
+            border-color: var(--primary);
+        }
+
+        .customer-info h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .customer-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+
+        .customer-id-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Ticket Form */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .selected-customer-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem 1rem;
+            background-color: rgba(99, 102, 241, 0.06);
+            border: 1px dashed rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        .selected-customer-banner span {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .selected-customer-banner button {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .ticket-textarea {
+            width: 100%;
+            height: 120px;
+            padding: 1rem;
+            background-color: rgba(11, 15, 25, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            resize: none;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .ticket-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            background: var(--bg-card);
+            color: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Results / Live Classification Visuals */
+        .result-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            background-color: rgba(11, 15, 25, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+
+        .prediction-badge {
+            align-self: flex-start;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+        }
+
+        .confidence-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .confidence-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .confidence-bar-bg {
+            height: 10px;
+            background-color: var(--bg-card);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .confidence-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 9999px;
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.1, 0.8, 0.25, 1);
+        }
+
+        .top-k-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-top: 0.5rem;
+        }
+
+        .top-k-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .top-k-item:last-child {
+            border-bottom: none;
+        }
+
+        .score-value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Issues log (Full Width Below) */
+        .issues-section {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-surface);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: rgba(11, 15, 25, 0.5);
+            padding: 1rem 1.25rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1.15rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .badge-payment { background-color: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-tech { background-color: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .badge-refund { background-color: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-delivery { background-color: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-inquiry { background-color: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+
+        /* Priority & Status Badges */
+        .badge-low { background-color: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+        .badge-medium { background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .badge-high { background-color: rgba(249, 115, 22, 0.15); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3); }
+        .badge-critical { background-color: rgba(220, 38, 38, 0.2); color: #f87171; border: 1px solid rgba(220, 38, 38, 0.4); box-shadow: 0 0 8px rgba(220, 38, 38, 0.2); }
+        .badge-open { background-color: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); }
+        .badge-resolved { background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .time-col {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .query-text-preview {
+            max-width: 450px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-muted);
+        }
+
+        /* Spinner for actions */
+        .spinner {
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-brain-circuit"></i>
+            <span>Routing Center</span>
+        </div>
+        <div class="status-badge" id="api-status">
+            <i class="fa-solid fa-circle-notch spinner"></i>
+            Checking connection...
+        </div>
+    </header>
+
+    <main>
+        <!-- Panel 1: Customer Selection & Form -->
+        <section class="card">
+            <div class="card-header" style="justify-content: space-between; display: flex; align-items: center;">
+                <h2 class="card-title">
+                    <i class="fa-solid fa-users"></i>
+                    1. Select Customer
+                </h2>
+                <button class="btn btn-sm" id="btn-toggle-add-cust" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; background-color: var(--bg-card); color: var(--primary); border: 1px solid var(--border-color);" onclick="toggleAddCustomerForm()">
+                    <i class="fa-solid fa-plus"></i> Add Customer
+                </button>
+            </div>
+
+            <!-- Slide-down Add Customer Form -->
+            <div id="add-customer-form-container" style="display: none; background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 0.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-main);"><i class="fa-solid fa-user-plus"></i> Add New Customer</div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div>
+                        <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Full Name *</label>
+                        <input type="text" id="new-cust-name" style="width:100%; padding:0.45rem; border-radius:6px; border:1px solid var(--border-color); background-color:var(--bg-base); color:white; font-family:inherit; font-size:0.8rem; outline:none;" placeholder="John Doe">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Email</label>
+                        <input type="email" id="new-cust-email" style="width:100%; padding:0.45rem; border-radius:6px; border:1px solid var(--border-color); background-color:var(--bg-base); color:white; font-family:inherit; font-size:0.8rem; outline:none;" placeholder="john@example.com">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div>
+                        <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Phone</label>
+                        <input type="text" id="new-cust-phone" style="width:100%; padding:0.45rem; border-radius:6px; border:1px solid var(--border-color); background-color:var(--bg-base); color:white; font-family:inherit; font-size:0.8rem; outline:none;" placeholder="+123456789">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Pincode</label>
+                        <input type="text" id="new-cust-pincode" style="width:100%; padding:0.45rem; border-radius:6px; border:1px solid var(--border-color); background-color:var(--bg-base); color:white; font-family:inherit; font-size:0.8rem; outline:none;" placeholder="100001">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div>
+                        <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">Account Number</label>
+                        <input type="text" id="new-cust-account" style="width:100%; padding:0.45rem; border-radius:6px; border:1px solid var(--border-color); background-color:var(--bg-base); color:white; font-family:inherit; font-size:0.8rem; outline:none;" placeholder="1234567890">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;">IFSC Code</label>
+                        <input type="text" id="new-cust-ifsc" style="width:100%; padding:0.45rem; border-radius:6px; border:1px solid var(--border-color); background-color:var(--bg-base); color:white; font-family:inherit; font-size:0.8rem; outline:none;" placeholder="ABCD0123456">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.25rem;">
+                    <button class="btn btn-sm" style="background-color: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border-color); padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="toggleAddCustomerForm()">Cancel</button>
+                    <button class="btn btn-sm" style="background-color: var(--primary); color: white; border: none; font-weight: bold; padding: 0.35rem 1rem; font-size: 0.75rem;" onclick="submitNewCustomer()">Add Customer</button>
+                </div>
+            </div>
+            
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" class="search-input" id="customer-search" placeholder="Search customer directory by name...">
+            </div>
+
+            <div class="customer-list-container" id="customer-list">
+                <!-- Loaded dynamically -->
+                <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    <i class="fa-solid fa-circle-notch spinner" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                    <p>Loading customers...</p>
+                </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--border-color);">
+
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    2. Describe Support Ticket
+                </h2>
+            </div>
+
+            <div class="form-group">
+                <div class="selected-customer-banner" id="active-customer-banner" style="display: none;">
+                    <div>Selected: <span id="active-customer-name">None</span></div>
+                    <button onclick="clearSelectedCustomer()">Deselect</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="ticket-query">Issue query details</label>
+                <textarea class="ticket-textarea" id="ticket-query" placeholder="Type or paste the support ticket description here..."></textarea>
+            </div>
+
+            <button class="btn btn-primary" id="analyze-btn" onclick="submitTicket()" disabled>
+                <i class="fa-solid fa-microchip"></i>
+                Analyze & Log Issue
+            </button>
+        </section>
+
+        <!-- Panel 2: Live AI Classifier Output -->
+        <section class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    AI Routing Analysis
+                </h2>
+            </div>
+
+            <div id="no-analysis" style="text-align: center; color: var(--text-muted); padding: 4rem 2rem; border: 1px dashed var(--border-color); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;">
+                <i class="fa-solid fa-robot" style="font-size: 3rem; color: rgba(255,255,255,0.05);"></i>
+                <p>Select a customer, type a query description, and click "Analyze & Log Issue" to route the ticket.</p>
+            </div>
+
+            <div id="analysis-results" style="display: none;" class="fade-in">
+                <div class="result-container">
+                    <div class="form-label">Predicted Destination Routing</div>
+                    <div class="prediction-badge" id="res-prediction">
+                        <i class="fa-solid fa-route"></i>
+                        <span>Payment Issue</span>
+                    </div>
+
+                    <div class="confidence-row">
+                        <div class="confidence-label">
+                            <span>AI Confidence Score</span>
+                            <span id="res-confidence">99.2%</span>
+                        </div>
+                        <div class="confidence-bar-bg">
+                            <div class="confidence-bar-fill" id="res-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <div class="top-k-title">Alternate Categorizations</div>
+                    <div id="top-k-list">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Issues Database Log -->
+        <section class="issues-section">
+            <div class="card-header" style="padding-top: 1rem;">
+                <h2 class="card-title">
+                    <i class="fa-solid fa-database"></i>
+                    Logged Issues Database (`issues` table)
+                </h2>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button class="btn" style="background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); color: var(--text-main); border: none; font-weight: 600; padding: 0.5rem 1.25rem;" onclick="triggerRetraining(this)">
+                        <i class="fa-solid fa-sync fa-spin" style="display:none; margin-right: 0.25rem;" id="retrain-spinner"></i>
+                        <i class="fa-solid fa-graduation-cap" style="margin-right: 0.25rem;" id="retrain-cap"></i>
+                        Trigger Retraining
+                    </button>
+                    <button class="btn" style="background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 0.5rem 1rem;" onclick="loadIssues()">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        Refresh Log
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>Customer Name</th>
+                            <th>Routed Category (Conf.)</th>
+                            <th>Routing Details</th>
+                            <th>Ticket Query Details</th>
+                            <th>Log Timestamp</th>
+                            <th style="width: 140px; text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="issues-tbody">
+                        <!-- Loaded dynamically -->
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                                <i class="fa-solid fa-circle-notch spinner" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                                <p>Loading issues database log...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let selectedCustomerId = null;
+        let customersData = [];
+
+        // Check health
+        async function checkHealth() {
+            const statusBadge = document.getElementById('api-status');
+            try {
+                const res = await fetch('/health');
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    statusBadge.className = 'status-badge';
+                    statusBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> ML Service Active: ${data.model}`;
+                } else {
+                    statusBadge.className = 'status-badge error';
+                    statusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Service Degraded`;
+                }
+            } catch (err) {
+                statusBadge.className = 'status-badge error';
+                statusBadge.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Connection Lost`;
+            }
+        }
+
+        // Load customers
+        async function loadCustomers(search = '') {
+            const listEl = document.getElementById('customer-list');
+            try {
+                let url = '/api/customers';
+                if (search) {
+                    url += `?search=${encodeURIComponent(search)}`;
+                }
+                const res = await fetch(url);
+                const data = await res.json();
+                customersData = data;
+
+                if (data.length === 0) {
+                    listEl.innerHTML = `
+                        <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                            <p>No customers found matching "${search}"</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                data.forEach(cust => {
+                    const div = document.createElement('div');
+                    div.id = `cust-${cust.id}`;
+                    div.className = `customer-item ${selectedCustomerId === cust.id ? 'selected' : ''}`;
+                    div.onclick = () => selectCustomer(cust);
+                    div.innerHTML = `
+                        <div class="customer-info">
+                            <h4>${cust.name}</h4>
+                            <p><i class="fa-regular fa-envelope"></i> ${cust.email} &nbsp;|&nbsp; <i class="fa-solid fa-phone"></i> ${cust.phone}</p>
+                        </div>
+                        <div class="customer-id-badge">ID: ${cust.id}</div>
+                    `;
+                    listEl.appendChild(div);
+                });
+            } catch (err) {
+                listEl.innerHTML = `
+                    <div style="text-align: center; color: #ef4444; padding: 2rem;">
+                        <p>Error loading customer directory.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Select customer
+        function selectCustomer(cust) {
+            selectedCustomerId = cust.id;
+            
+            // Highlight selected item in list
+            document.querySelectorAll('.customer-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            const selectedEl = document.getElementById(`cust-${cust.id}`);
+            if (selectedEl) {
+                selectedEl.classList.add('selected');
+            }
+
+            // Show selected banner
+            document.getElementById('active-customer-banner').style.display = 'flex';
+            document.getElementById('active-customer-name').innerText = `${cust.name} (ID: ${cust.id})`;
+            
+            validateForm();
+        }
+
+        // Clear customer select
+        function clearSelectedCustomer() {
+            selectedCustomerId = null;
+            document.getElementById('active-customer-banner').style.display = 'none';
+            document.querySelectorAll('.customer-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            validateForm();
+        }
+
+        // Form validate
+        function validateForm() {
+            const query = document.getElementById('ticket-query').value.trim();
+            const btn = document.getElementById('analyze-btn');
+            if (selectedCustomerId !== null && query.length > 0) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        }
+
+        // Text area event
+        document.getElementById('ticket-query').addEventListener('input', validateForm);
+
+        // Customer search event
+        let searchTimeout;
+        document.getElementById('customer-search').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                loadCustomers(e.target.value.trim());
+            }, 300);
+        });
+
+        // Submit Ticket
+        async function submitTicket() {
+            const query = document.getElementById('ticket-query').value.trim();
+            if (!query || selectedCustomerId === null) return;
+
+            const btn = document.getElementById('analyze-btn');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch spinner"></i> Running AI Analysis...`;
+
+            try {
+                // Post to API issues
+                const res = await fetch('/api/issues', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customer_id: selectedCustomerId,
+                        query_text: query
+                    })
+                });
+
+                const data = await res.json();
+                
+                // Show AI results cards
+                document.getElementById('no-analysis').style.display = 'none';
+                const resultsEl = document.getElementById('analysis-results');
+                resultsEl.style.display = 'block';
+
+                document.getElementById('res-prediction').querySelector('span').innerText = data.issue;
+                
+                // Style prediction badge depending on category
+                const badgeClass = getBadgeClass(data.issue);
+                document.getElementById('res-prediction').className = `prediction-badge ${badgeClass}`;
+
+                // Set confidence details
+                const confidencePct = (data.confidence * 100).toFixed(1);
+                document.getElementById('res-confidence').innerText = `${confidencePct}%`;
+                document.getElementById('res-bar-fill').style.width = `${confidencePct}%`;
+
+                // Perform secondary prediction call to retrieve full top_k
+                const predRes = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: query })
+                });
+                const predData = await predRes.json();
+
+                const topKEl = document.getElementById('top-k-list');
+                topKEl.innerHTML = '';
+                predData.top_k.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'top-k-item';
+                    row.innerHTML = `
+                        <span>${item.label}</span>
+                        <span class="score-value">${(item.score * 100).toFixed(2)}%</span>
+                    `;
+                    topKEl.appendChild(row);
+                });
+
+                // Clear input
+                document.getElementById('ticket-query').value = '';
+                clearSelectedCustomer();
+                
+                // Refresh log list
+                await loadIssues();
+
+            } catch (err) {
+                alert('Failed to analyze and save issue: ' + err.message);
+            } finally {
+                btn.innerHTML = originalHtml;
+                validateForm();
+            }
+        }
+
+        // Get matching badge style
+        function getBadgeClass(issue) {
+            if (issue === 'Payment Issue') return 'badge-payment';
+            if (issue === 'Technical Problem') return 'badge-tech';
+            if (issue === 'Refund Request') return 'badge-refund';
+            if (issue === 'Delivery Issue') return 'badge-delivery';
+            if (issue === 'Product Inquiry') return 'badge-inquiry';
+            return '';
+        }
+
+        // Load logged issues
+        async function loadIssues() {
+            const tbody = document.getElementById('issues-tbody');
+            try {
+                const res = await fetch('/api/issues');
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                                <p>No issues logged in database yet.</p>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                data.forEach(issue => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'fade-in';
+                    
+                    const badgeClass = getBadgeClass(issue.issue);
+                    
+                    // Format date
+                    const d = new Date(issue.created_at);
+                    const dateStr = d.toLocaleString();
+
+                    // Safely format confidence
+                    const confidenceStr = issue.confidence !== null && issue.confidence !== undefined 
+                        ? `${(issue.confidence * 100).toFixed(1)}%` 
+                        : 'N/A';
+
+                    tr.innerHTML = `
+                        <td style="font-weight: 700;">#${issue.id}</td>
+                        <td style="font-weight: 600;">${issue.name} <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">(ID: ${issue.customer_id})</span></td>
+                        <td id="category-cell-${issue.id}">
+                            <span class="badge ${badgeClass}">${issue.issue}</span>
+                            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                Conf: ${confidenceStr}
+                            </div>
+                            ${issue.is_corrected ? '<div style="font-size: 0.68rem; color: var(--success); margin-top: 0.2rem; font-weight: 700;"><i class="fa-solid fa-check-double"></i> Corrected</div>' : ''}
+                        </td>
+                        <td id="routing-cell-${issue.id}">
+                            <span class="badge badge-${(issue.priority || 'Medium').toLowerCase()}">${issue.priority || 'Medium'}</span>
+                            <span class="badge badge-${(issue.status || 'Open').toLowerCase()}">${issue.status || 'Open'}</span>
+                            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem;">
+                                Dept: ${issue.assigned_department || 'General Support'}
+                            </div>
+                        </td>
+                        <td><div class="query-text-preview" title="${escapeHtml(issue.query_text)}">${escapeHtml(issue.query_text)}</div></td>
+                        <td class="time-col">${dateStr}</td>
+                        <td style="text-align: center;" id="actions-cell-${issue.id}">
+                            <button class="btn btn-sm" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; background-color: var(--bg-card); color: var(--primary); border: 1px solid var(--border-color);" onclick="enableEdit(${issue.id}, '${issue.issue.replace("'", "\\'")}')">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit Route
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: #ef4444; padding: 3rem;">
+                            <p>Failed to query issues log from database.</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Active Learning Edit States
+        let activeEditId = null;
+
+        function enableEdit(issueId, currentCategory) {
+            if (activeEditId !== null) {
+                cancelEdit(activeEditId);
+            }
+            activeEditId = issueId;
+
+            const catCell = document.getElementById(`category-cell-${issueId}`);
+            const actionsCell = document.getElementById(`actions-cell-${issueId}`);
+            
+            const categories = [
+                'Payment Issue',
+                'Technical Problem',
+                'Refund Request',
+                'Delivery Issue',
+                'Product Inquiry'
+            ];
+            
+            let selectHtml = `<select id="edit-select-${issueId}" style="width: 100%; padding: 0.35rem; border-radius: 6px; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--primary); font-family: inherit; font-size: 0.8rem; outline: none; margin-bottom: 0.25rem;">`;
+            categories.forEach(cat => {
+                const selected = cat === currentCategory ? 'selected' : '';
+                selectHtml += `<option value="${cat}" ${selected}>${cat}</option>`;
+            });
+            selectHtml += `</select>`;
+
+            catCell.setAttribute('data-original-html', catCell.innerHTML);
+            actionsCell.setAttribute('data-original-html', actionsCell.innerHTML);
+
+            catCell.innerHTML = selectHtml;
+            actionsCell.innerHTML = `
+                <div style="display: flex; gap: 0.35rem; justify-content: center; margin-top: 0.25rem;">
+                    <button class="btn btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; background-color: var(--success); color: white; border: none; font-weight: bold;" onclick="saveEdit(${issueId})">
+                        <i class="fa-solid fa-save"></i> Save
+                    </button>
+                    <button class="btn btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; background-color: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border-color);" onclick="cancelEdit(${issueId})">
+                        <i class="fa-solid fa-times"></i> Cancel
+                    </button>
+                </div>
+            `;
+        }
+
+        function cancelEdit(issueId) {
+            const catCell = document.getElementById(`category-cell-${issueId}`);
+            const actionsCell = document.getElementById(`actions-cell-${issueId}`);
+            
+            catCell.innerHTML = catCell.getAttribute('data-original-html');
+            actionsCell.innerHTML = actionsCell.getAttribute('data-original-html');
+            
+            activeEditId = null;
+        }
+
+        async function saveEdit(issueId) {
+            const select = document.getElementById(`edit-select-${issueId}`);
+            const newCategory = select.value;
+            
+            try {
+                const res = await fetch(`/api/issues/${issueId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ issue: newCategory })
+                });
+                
+                if (!res.ok) {
+                    throw new Error('Failed to update: ' + res.statusText);
+                }
+                
+                activeEditId = null;
+                await loadIssues();
+            } catch (err) {
+                alert('Error updating issue category: ' + err.message);
+                cancelEdit(issueId);
+            }
+        }
+
+        async function triggerRetraining(btn) {
+            const spinner = document.getElementById('retrain-spinner');
+            const cap = document.getElementById('retrain-cap');
+            
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            cap.style.display = 'none';
+            
+            try {
+                const res = await fetch('/api/retrain', {
+                    method: 'POST'
+                });
+                
+                if (!res.ok) {
+                    throw new Error('Server error: ' + res.status);
+                }
+                
+                alert('Active Learning Triggered: Retraining process started in the background. The model will run evaluations on the updated training set.');
+            } catch (err) {
+                alert('Failed to trigger model retraining: ' + err.message);
+            } finally {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    spinner.style.display = 'none';
+                    cap.style.display = 'inline-block';
+                }, 3000);
+            }
+        }
+
+        // Add Customer functions
+        function toggleAddCustomerForm() {
+            const container = document.getElementById('add-customer-form-container');
+            const btn = document.getElementById('btn-toggle-add-cust');
+            if (container.style.display === 'none') {
+                container.style.display = 'flex';
+                btn.innerHTML = '<i class="fa-solid fa-minus"></i> Hide Form';
+            } else {
+                container.style.display = 'none';
+                btn.innerHTML = '<i class="fa-solid fa-plus"></i> Add Customer';
+                clearAddCustomerInputs();
+            }
+        }
+
+        function clearAddCustomerInputs() {
+            document.getElementById('new-cust-name').value = '';
+            document.getElementById('new-cust-email').value = '';
+            document.getElementById('new-cust-phone').value = '';
+            document.getElementById('new-cust-pincode').value = '';
+            document.getElementById('new-cust-account').value = '';
+            document.getElementById('new-cust-ifsc').value = '';
+        }
+
+        async function submitNewCustomer() {
+            const name = document.getElementById('new-cust-name').value.trim();
+            const email = document.getElementById('new-cust-email').value.trim();
+            const phone = document.getElementById('new-cust-phone').value.trim();
+            const pincode = document.getElementById('new-cust-pincode').value.trim();
+            const account_number = document.getElementById('new-cust-account').value.trim();
+            const ifsc_code = document.getElementById('new-cust-ifsc').value.trim();
+
+            if (!name) {
+                alert('Customer Full Name is required.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/customers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email: email || null,
+                        phone: phone || null,
+                        pincode: pincode || null,
+                        account_number: account_number || null,
+                        ifsc_code: ifsc_code || null
+                    })
+                });
+
+                if (!res.ok) {
+                    throw new Error('Failed to create customer: ' + res.statusText);
+                }
+
+                const data = await res.json();
+                
+                alert(`Customer "${data.name}" added successfully with ID ${data.id}!`);
+                
+                // Select the new customer
+                selectCustomer({
+                    id: data.id,
+                    name: data.name,
+                    email: data.email,
+                    phone: data.phone
+                });
+                
+                // Hide and clear form
+                toggleAddCustomerForm();
+                
+                // Reload customer list
+                document.getElementById('customer-search').value = '';
+                await loadCustomers();
+
+            } catch (err) {
+                alert('Error creating customer: ' + err.message);
+            }
+        }
+
+        // HTML safety escape
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Onload init
+        window.addEventListener('DOMContentLoaded', () => {
+            checkHealth();
+            loadCustomers();
+            loadIssues();
+            
+            // Poll health occasionally
+            setInterval(checkHealth, 10000);
+        });
+    </script>
+</body>
+</html>
